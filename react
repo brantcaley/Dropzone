@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MapPin, Zap, Mountain, CheckCircle, Circle, List, ChevronRight } from 'lucide-react';
+import { Star, MapPin, Zap, Mountain, CheckCircle, Circle, List, ChevronRight, Database, ArrowUpDown } from 'lucide-react';
 
 const PARKS = [
   {
@@ -161,6 +161,8 @@ export default function CoasterCatalog() {
   const [ratings, setRatings] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [dbTable, setDbTable] = useState('coasters'); // 'parks' or 'coasters'
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   useEffect(() => {
     loadData();
@@ -281,6 +283,15 @@ export default function CoasterCatalog() {
               <List size={20} />
               List View
             </button>
+            <button
+              onClick={() => { setView('database'); setSelectedPark(null); setSelectedCoaster(null); }}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                view === 'database' ? 'bg-teal-500 text-white' : 'bg-teal-800/50 hover:bg-teal-700/50 text-teal-100'
+              }`}
+            >
+              <Database size={20} />
+              Database
+            </button>
           </div>
 
           <input
@@ -383,7 +394,7 @@ export default function CoasterCatalog() {
               {getFilteredParks().map((park) => {
                 const coastersHere = park.coasters.length;
                 const riddenHere = park.coasters.filter(c => riddenCoasters[getCoasterId(park.id, c.name)]).length;
-                
+
                 return (
                   <div
                     key={park.id}
@@ -419,6 +430,156 @@ export default function CoasterCatalog() {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {view === 'database' && (
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-3xl font-bold text-yellow-300">Database View</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDbTable('parks')}
+                    className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                      dbTable === 'parks' ? 'bg-yellow-500 text-gray-900' : 'bg-teal-700/50 hover:bg-teal-600/50 text-teal-100'
+                    }`}
+                  >
+                    Parks ({PARKS.length})
+                  </button>
+                  <button
+                    onClick={() => setDbTable('coasters')}
+                    className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                      dbTable === 'coasters' ? 'bg-yellow-500 text-gray-900' : 'bg-teal-700/50 hover:bg-teal-600/50 text-teal-100'
+                    }`}
+                  >
+                    Coasters ({stats.totalCoasters})
+                  </button>
+                </div>
+              </div>
+              <p className="text-teal-200 text-sm">Review the data below. Click column headers to sort. Let me know any changes you'd like!</p>
+            </div>
+
+            {dbTable === 'parks' && (
+              <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-teal-900/50 border-b border-teal-400/30">
+                      <tr>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'id', direction: sortConfig.key === 'id' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">ID <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'name', direction: sortConfig.key === 'name' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Name <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'location', direction: sortConfig.key === 'location' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Location <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'state', direction: sortConfig.key === 'state' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">State <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold">Lat</th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold">Lon</th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'coasterCount', direction: sortConfig.key === 'coasterCount' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Coasters <ArrowUpDown size={14} /></span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...PARKS].sort((a, b) => {
+                        if (!sortConfig.key) return 0;
+                        let aVal = sortConfig.key === 'coasterCount' ? a.coasters.length : a[sortConfig.key];
+                        let bVal = sortConfig.key === 'coasterCount' ? b.coasters.length : b[sortConfig.key];
+                        if (typeof aVal === 'string') {
+                          return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                        }
+                        return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                      }).map((park, idx) => (
+                        <tr key={park.id} className={`border-b border-teal-400/10 hover:bg-teal-700/30 ${idx % 2 === 0 ? 'bg-teal-900/20' : ''}`}>
+                          <td className="px-4 py-3 text-teal-100">{park.id}</td>
+                          <td className="px-4 py-3 text-white font-medium">{park.name}</td>
+                          <td className="px-4 py-3 text-teal-200">{park.location}</td>
+                          <td className="px-4 py-3 text-teal-200">{park.state}</td>
+                          <td className="px-4 py-3 text-teal-300 font-mono text-sm">{park.lat}</td>
+                          <td className="px-4 py-3 text-teal-300 font-mono text-sm">{park.lon}</td>
+                          <td className="px-4 py-3 text-yellow-300 font-bold">{park.coasters.length}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {dbTable === 'coasters' && (
+              <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-teal-900/50 border-b border-teal-400/30">
+                      <tr>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'parkName', direction: sortConfig.key === 'parkName' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Park <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'name', direction: sortConfig.key === 'name' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Name <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'type', direction: sortConfig.key === 'type' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Type <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'speed', direction: sortConfig.key === 'speed' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Speed <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'height', direction: sortConfig.key === 'height' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Height <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'drop', direction: sortConfig.key === 'drop' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Drop <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'length', direction: sortConfig.key === 'length' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Length <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'inversions', direction: sortConfig.key === 'inversions' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Inv. <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'opened', direction: sortConfig.key === 'opened' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Opened <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const allCoasters = PARKS.flatMap(park =>
+                          park.coasters.map(c => ({ ...c, parkId: park.id, parkName: park.name }))
+                        );
+                        return allCoasters.sort((a, b) => {
+                          if (!sortConfig.key) return 0;
+                          let aVal = a[sortConfig.key];
+                          let bVal = b[sortConfig.key];
+                          if (typeof aVal === 'string') {
+                            return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                          }
+                          return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                        }).map((coaster, idx) => (
+                          <tr key={`${coaster.parkId}-${coaster.name}`} className={`border-b border-teal-400/10 hover:bg-teal-700/30 ${idx % 2 === 0 ? 'bg-teal-900/20' : ''}`}>
+                            <td className="px-3 py-2 text-teal-200">{coaster.parkName}</td>
+                            <td className="px-3 py-2 text-white font-medium">{coaster.name}</td>
+                            <td className="px-3 py-2 text-teal-300">{coaster.type}</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.speed} mph</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.height} ft</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.drop} ft</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.length} ft</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.inversions}</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.opened}</td>
+                            <td className="px-3 py-2 text-teal-300 max-w-xs truncate" title={coaster.description}>{coaster.description}</td>
+                          </tr>
+                        ));
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
