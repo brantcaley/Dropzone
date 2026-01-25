@@ -1,0 +1,790 @@
+import React, { useState, useEffect } from 'react';
+import { Star, MapPin, Zap, Mountain, CheckCircle, Circle, List, ChevronRight, Database, ArrowUpDown } from 'lucide-react';
+
+const PARKS = [
+  {
+    id: 1,
+    name: "Cedar Point",
+    location: "Sandusky, OH",
+    state: "Ohio",
+    lat: 41.4779,
+    lon: -82.6831,
+    coasters: [
+      { name: "Top Thrill 2", speed: 120, height: 420, drop: 420, length: 3422, inversions: 0, type: "Steel Multi-Launch", opened: 2024, povVideo: "https://www.youtube.com/embed/8bKB3HdLx0o", description: "World's tallest triple-launch strata coaster." },
+      { name: "Millennium Force", speed: 93, height: 310, drop: 300, length: 6595, inversions: 0, type: "Steel Giga", opened: 2000, povVideo: "https://www.youtube.com/embed/3bHKv5-c11c", description: "First giga coaster with 310-foot drop." },
+      { name: "Valravn", speed: 75, height: 223, drop: 214, length: 3415, inversions: 3, type: "Steel Dive", opened: 2016, povVideo: "https://www.youtube.com/embed/VjCIxRb4LWo", description: "World's tallest dive coaster." },
+      { name: "Steel Vengeance", speed: 74, height: 205, drop: 200, length: 5740, inversions: 4, type: "Hybrid RMC", opened: 2018, povVideo: "https://www.youtube.com/embed/gXamBX7CpNI", description: "World's longest hybrid with 27 seconds airtime." },
+      { name: "Magnum XL-200", speed: 72, height: 205, drop: 194, length: 5106, inversions: 0, type: "Steel Hyper", opened: 1989, povVideo: "https://www.youtube.com/embed/LTiDV-SJIXc", description: "First hypercoaster over 200 feet." },
+      { name: "Maverick", speed: 70, height: 105, drop: 100, length: 4450, inversions: 2, type: "Steel Launched", opened: 2007, povVideo: "https://www.youtube.com/embed/iKTOi36va54", description: "Two launches with 95-degree drop." },
+      { name: "GateKeeper", speed: 67, height: 170, drop: 164, length: 4164, inversions: 6, type: "Steel Wing", opened: 2013, povVideo: "https://www.youtube.com/embed/gXOGW-nPEWI", description: "Wing coaster with highest inversion." },
+      { name: "Gemini", speed: 60, height: 125, drop: 118, length: 3935, inversions: 0, type: "Steel Racing", opened: 1978, povVideo: "https://www.youtube.com/embed/Gd8p9K7GxfY", description: "Classic racing coaster." },
+      { name: "Rougarou", speed: 60, height: 145, drop: 137, length: 3900, inversions: 5, type: "Steel Floorless", opened: 2015, povVideo: "https://www.youtube.com/embed/HxfI92uRqFI", description: "Floorless with five inversions." },
+      { name: "Raptor", speed: 57, height: 137, drop: 119, length: 3790, inversions: 6, type: "Steel Inverted", opened: 1994, povVideo: "https://www.youtube.com/embed/P8j8FnLkMZQ", description: "Classic inverted coaster." }
+    ]
+  },
+  {
+    id: 2,
+    name: "Six Flags Magic Mountain",
+    location: "Valencia, CA",
+    state: "California",
+    lat: 34.4250,
+    lon: -118.5973,
+    coasters: [
+      { name: "Goliath", speed: 85, height: 255, drop: 255, length: 4500, inversions: 0, type: "Steel Hyper", opened: 2000, povVideo: "https://www.youtube.com/embed/TrG7tqJkJYs", description: "Massive hyper with intense g-forces." },
+      { name: "X2", speed: 76, height: 175, drop: 215, length: 3610, inversions: 2, type: "4th Dimension", opened: 2002, povVideo: "https://www.youtube.com/embed/xaQJHCHs3Mg", description: "World's first 4D coaster." },
+      { name: "Full Throttle", speed: 70, height: 160, drop: 160, length: 2200, inversions: 1, type: "Steel Launched", opened: 2013, povVideo: "https://www.youtube.com/embed/YJOzlU5Wn3U", description: "World's tallest vertical loop." },
+      { name: "Viper", speed: 70, height: 188, drop: 171, length: 3830, inversions: 7, type: "Steel Looping", opened: 1990, povVideo: "https://www.youtube.com/embed/fzK3JKMnCJg", description: "Classic looping coaster." },
+      { name: "Riddler's Revenge", speed: 65, height: 156, drop: 146, length: 4370, inversions: 6, type: "Steel Stand-Up", opened: 1998, povVideo: "https://www.youtube.com/embed/PB-kMZmTnE0", description: "Tallest stand-up coaster." },
+      { name: "Scream", speed: 65, height: 150, drop: 141, length: 3985, inversions: 7, type: "Steel Floorless", opened: 2003, povVideo: "https://www.youtube.com/embed/Qh1fkDXRg_s", description: "Floorless with seven inversions." },
+      { name: "Tatsu", speed: 62, height: 170, drop: 124, length: 3602, inversions: 0, type: "Steel Flying", opened: 2006, povVideo: "https://www.youtube.com/embed/7Cd28Fp3f0s", description: "World's tallest flying coaster." },
+      { name: "Wonder Woman", speed: 58, height: 131, drop: 113, length: 3300, inversions: 3, type: "Steel Single-Rail", opened: 2022, povVideo: "https://www.youtube.com/embed/h8pjhP0-Azc", description: "Tallest single-rail coaster." },
+      { name: "Twisted Colossus", speed: 57, height: 121, drop: 128, length: 4990, inversions: 2, type: "Hybrid RMC", opened: 2015, povVideo: "https://www.youtube.com/embed/jvOPGLY24wg", description: "Dueling hybrid coaster." },
+      { name: "Batman", speed: 50, height: 105, drop: 78, length: 2700, inversions: 5, type: "Steel Inverted", opened: 1994, povVideo: "https://www.youtube.com/embed/Hkb7wNsWnBU", description: "Prototype inverted coaster." }
+    ]
+  },
+  {
+    id: 3,
+    name: "Carowinds",
+    location: "Charlotte, NC",
+    state: "North Carolina",
+    lat: 35.1042,
+    lon: -80.9394,
+    coasters: [
+      { name: "Fury 325", speed: 95, height: 325, drop: 320, length: 6602, inversions: 0, type: "Steel Giga", opened: 2015, povVideo: "https://www.youtube.com/embed/OlwYmIke5Fo", description: "North America's tallest giga at 325 feet." },
+      { name: "Intimidator", speed: 80, height: 232, drop: 211, length: 5316, inversions: 0, type: "Steel Hyper", opened: 2010, povVideo: "https://www.youtube.com/embed/9s-91TpVTOw", description: "B&M hyper with great airtime." },
+      { name: "Afterburn", speed: 62, height: 113, drop: 113, length: 2956, inversions: 6, type: "Steel Inverted", opened: 1999, povVideo: "https://www.youtube.com/embed/shdOJ9nBt_4", description: "Intense inverted coaster." },
+      { name: "Nighthawk", speed: 51, height: 115, drop: 95, length: 2775, inversions: 5, type: "Steel Flying", opened: 2004, povVideo: "https://www.youtube.com/embed/XN6Qhh7DLCA", description: "Flying coaster face-down." },
+      { name: "Copperhead Strike", speed: 42, height: 82, drop: 82, length: 3255, inversions: 5, type: "Steel Launched", opened: 2019, povVideo: "https://www.youtube.com/embed/hMy2dZ-EFNM", description: "Double-launch coaster." }
+    ]
+  },
+  {
+    id: 4,
+    name: "Kings Island",
+    location: "Mason, OH",
+    state: "Ohio",
+    lat: 39.3450,
+    lon: -84.2684,
+    coasters: [
+      { name: "Orion", speed: 91, height: 287, drop: 300, length: 5321, inversions: 0, type: "Steel Giga", opened: 2020, povVideo: "https://www.youtube.com/embed/dKPWjJKL4k8", description: "B&M giga with 300-foot drop." },
+      { name: "Diamondback", speed: 80, height: 230, drop: 215, length: 5282, inversions: 0, type: "Steel Hyper", opened: 2009, povVideo: "https://www.youtube.com/embed/qMbzQW3pMkM", description: "B&M hyper with amazing airtime." },
+      { name: "Banshee", speed: 68, height: 167, drop: 150, length: 4124, inversions: 7, type: "Steel Inverted", opened: 2014, povVideo: "https://www.youtube.com/embed/NYy9Ye0ATro", description: "World's longest inverted." },
+      { name: "The Beast", speed: 65, height: 110, drop: 141, length: 7359, inversions: 0, type: "Wooden", opened: 1979, povVideo: "https://www.youtube.com/embed/K4EZ7XbiK-I", description: "World's longest wooden coaster." },
+      { name: "Mystic Timbers", speed: 53, height: 109, drop: 98, length: 3265, inversions: 0, type: "Wooden GCI", opened: 2017, povVideo: "https://www.youtube.com/embed/G8_vJ4e90Ro", description: "Fast GCI wooden coaster." }
+    ]
+  },
+  {
+    id: 5,
+    name: "Canada's Wonderland",
+    location: "Vaughan, ON",
+    state: "Ontario",
+    lat: 43.8430,
+    lon: -79.5387,
+    coasters: [
+      { name: "Leviathan", speed: 92, height: 306, drop: 306, length: 5486, inversions: 0, type: "Steel Giga", opened: 2012, povVideo: "https://www.youtube.com/embed/gJR7PKKZV0A", description: "Third tallest traditional coaster." },
+      { name: "Yukon Striker", speed: 80, height: 245, drop: 245, length: 3625, inversions: 4, type: "Steel Dive", opened: 2019, povVideo: "https://www.youtube.com/embed/uaYkXzIZ9Hc", description: "World's fastest dive coaster." },
+      { name: "Behemoth", speed: 77, height: 230, drop: 208, length: 5318, inversions: 0, type: "Steel Hyper", opened: 2008, povVideo: "https://www.youtube.com/embed/OdA9PBV4aQg", description: "B&M hyper with great airtime." }
+    ]
+  },
+  {
+    id: 6,
+    name: "Busch Gardens Tampa",
+    location: "Tampa, FL",
+    state: "Florida",
+    lat: 28.0372,
+    lon: -82.4195,
+    coasters: [
+      { name: "Iron Gwazi", speed: 76, height: 206, drop: 206, length: 4075, inversions: 3, type: "Hybrid RMC", opened: 2022, povVideo: "https://www.youtube.com/embed/yIYvN5VdqYE", description: "World's tallest hybrid coaster." },
+      { name: "SheiKra", speed: 70, height: 200, drop: 200, length: 3188, inversions: 2, type: "Steel Dive", opened: 2005, povVideo: "https://www.youtube.com/embed/uqaYIvmHhPQ", description: "First dive coaster in North America." },
+      { name: "Cheetah Hunt", speed: 60, height: 102, drop: 130, length: 4429, inversions: 1, type: "Steel Launched", opened: 2011, povVideo: "https://www.youtube.com/embed/m2S14q8EiKA", description: "Triple-launch coaster." },
+      { name: "Montu", speed: 60, height: 150, drop: 128, length: 3983, inversions: 7, type: "Steel Inverted", opened: 1996, povVideo: "https://www.youtube.com/embed/DqkJUBJUGPI", description: "Intense inverted with seven inversions." }
+    ]
+  },
+  {
+    id: 7,
+    name: "Dollywood",
+    location: "Pigeon Forge, TN",
+    state: "Tennessee",
+    lat: 35.7956,
+    lon: -83.5303,
+    coasters: [
+      { name: "Lightning Rod", speed: 73, height: 206, drop: 165, length: 3800, inversions: 0, type: "Hybrid RMC", opened: 2016, povVideo: "https://www.youtube.com/embed/2GPcPF7YY-4", description: "World's fastest wooden coaster." },
+      { name: "Wild Eagle", speed: 61, height: 210, drop: 135, length: 3127, inversions: 4, type: "Steel Wing", opened: 2012, povVideo: "https://www.youtube.com/embed/ycV_F1nY6gE", description: "First US wing coaster." },
+      { name: "Tennessee Tornado", speed: 63, height: 163, drop: 128, length: 2682, inversions: 3, type: "Steel Looping", opened: 1999, povVideo: "https://www.youtube.com/embed/gLRD9mZYuOc", description: "Looping coaster in mountainside." }
+    ]
+  },
+  {
+    id: 8,
+    name: "Hersheypark",
+    location: "Hershey, PA",
+    state: "Pennsylvania",
+    lat: 40.2885,
+    lon: -76.6574,
+    coasters: [
+      { name: "Candymonium", speed: 76, height: 210, drop: 210, length: 4636, inversions: 0, type: "Steel Hyper", opened: 2020, povVideo: "https://www.youtube.com/embed/HuOTq7rjFcI", description: "B&M hyper with smooth airtime." },
+      { name: "Skyrush", speed: 75, height: 200, drop: 212, length: 3600, inversions: 0, type: "Steel Hyper", opened: 2012, povVideo: "https://www.youtube.com/embed/OOb-kVSjGYk", description: "Intense Intamin hyper." },
+      { name: "Storm Runner", speed: 72, height: 150, drop: 180, length: 2850, inversions: 3, type: "Steel Launched", opened: 2004, povVideo: "https://www.youtube.com/embed/0kvQlS7KadQ", description: "Launch to 72 mph in 2 seconds." }
+    ]
+  },
+  {
+    id: 9,
+    name: "SeaWorld Orlando",
+    location: "Orlando, FL",
+    state: "Florida",
+    lat: 28.4110,
+    lon: -81.4610,
+    coasters: [
+      { name: "Mako", speed: 73, height: 200, drop: 200, length: 4760, inversions: 0, type: "Steel Hyper", opened: 2016, povVideo: "https://www.youtube.com/embed/U0hl45gZjyY", description: "Tallest coaster in Orlando." },
+      { name: "Kraken", speed: 65, height: 149, drop: 144, length: 4177, inversions: 7, type: "Steel Floorless", opened: 2000, povVideo: "https://www.youtube.com/embed/gZgz8rG61zk", description: "Floorless with seven inversions." },
+      { name: "Manta", speed: 56, height: 140, drop: 113, length: 3359, inversions: 4, type: "Steel Flying", opened: 2009, povVideo: "https://www.youtube.com/embed/3OKVE5iW7GE", description: "Flying coaster like manta ray." }
+    ]
+  },
+  {
+    id: 10,
+    name: "Universal Islands of Adventure",
+    location: "Orlando, FL",
+    state: "Florida",
+    lat: 28.4710,
+    lon: -81.4720,
+    coasters: [
+      { name: "VelociCoaster", speed: 70, height: 155, drop: 140, length: 4700, inversions: 4, type: "Steel Launched", opened: 2021, povVideo: "https://www.youtube.com/embed/U5JKN7CTZVE", description: "Fastest at Universal with Mosasaurus Roll." },
+      { name: "Incredible Hulk", speed: 67, height: 110, drop: 105, length: 3670, inversions: 7, type: "Steel Launched", opened: 1999, povVideo: "https://www.youtube.com/embed/6C4OMCElJsE", description: "Launch with seven inversions." },
+      { name: "Hagrid's Motorbike", speed: 50, height: 65, drop: 65, length: 5053, inversions: 0, type: "Steel Launched", opened: 2019, povVideo: "https://www.youtube.com/embed/QKt1LDjQeNE", description: "Story-driven multi-launch coaster." }
+    ]
+  }
+];
+
+export default function App() {
+  const [view, setView] = useState('map');
+  const [selectedPark, setSelectedPark] = useState(null);
+  const [selectedCoaster, setSelectedCoaster] = useState(null);
+  const [riddenCoasters, setRiddenCoasters] = useState({});
+  const [ratings, setRatings] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [dbTable, setDbTable] = useState('coasters');
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = () => {
+    try {
+      const riddenData = localStorage.getItem('ridden-coasters');
+      const ratingsData = localStorage.getItem('coaster-ratings');
+
+      if (riddenData) {
+        setRiddenCoasters(JSON.parse(riddenData));
+      }
+      if (ratingsData) {
+        setRatings(JSON.parse(ratingsData));
+      }
+    } catch (error) {
+      console.log('No saved data found');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCoasterId = (parkId, coasterName) => `${parkId}-${coasterName}`;
+
+  const toggleRidden = (parkId, coasterName) => {
+    const id = getCoasterId(parkId, coasterName);
+    const newRidden = { ...riddenCoasters, [id]: !riddenCoasters[id] };
+    setRiddenCoasters(newRidden);
+    try {
+      localStorage.setItem('ridden-coasters', JSON.stringify(newRidden));
+    } catch (error) {
+      console.error('Failed to save:', error);
+    }
+  };
+
+  const handleSetRating = (parkId, coasterName, rating) => {
+    const id = getCoasterId(parkId, coasterName);
+    const newRatings = { ...ratings, [id]: rating };
+    setRatings(newRatings);
+    try {
+      localStorage.setItem('coaster-ratings', JSON.stringify(newRatings));
+    } catch (error) {
+      console.error('Failed to save:', error);
+    }
+  };
+
+  const getFilteredParks = () => {
+    if (!searchTerm) return PARKS;
+    return PARKS.filter(park =>
+      park.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      park.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      park.state.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  const stats = {
+    totalParks: PARKS.length,
+    totalCoasters: PARKS.reduce((sum, park) => sum + park.coasters.length, 0),
+    ridden: Object.values(riddenCoasters).filter(Boolean).length,
+    avgRating: Object.values(ratings).length > 0
+      ? (Object.values(ratings).reduce((a, b) => a + b, 0) / Object.values(ratings).length).toFixed(1)
+      : 0
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-teal-900 via-teal-800 to-gray-900 text-white">
+      <header className="bg-teal-950/50 backdrop-blur-md border-b border-teal-400/20 p-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-gold-400 via-yellow-300 to-gold-500 bg-clip-text text-transparent text-center" style={{ backgroundImage: 'linear-gradient(to right, #fbbf24, #fcd34d, #fbbf24)' }}>
+            North America Top Parks
+          </h1>
+          <p className="text-xl text-teal-100 text-center mb-4">Track rollercoasters at top parks!</p>
+
+          <div className="flex justify-center gap-4 mb-4 text-sm">
+            <div className="bg-teal-700/40 border border-teal-400/30 rounded-lg px-4 py-2">
+              <div className="text-2xl font-bold text-yellow-400">{stats.totalParks}</div>
+              <div className="text-teal-200">Parks</div>
+            </div>
+            <div className="bg-teal-700/40 border border-teal-400/30 rounded-lg px-4 py-2">
+              <div className="text-2xl font-bold text-yellow-400">{stats.totalCoasters}</div>
+              <div className="text-teal-200">Coasters</div>
+            </div>
+            <div className="bg-yellow-500/20 border border-yellow-400/40 rounded-lg px-4 py-2">
+              <div className="text-2xl font-bold text-yellow-300">{stats.ridden}</div>
+              <div className="text-teal-200">Ridden</div>
+            </div>
+            <div className="bg-yellow-500/20 border border-yellow-400/40 rounded-lg px-4 py-2">
+              <div className="text-2xl font-bold text-yellow-300">{stats.avgRating || 'N/A'}</div>
+              <div className="text-teal-200">Avg Rating</div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-center justify-center mb-4">
+            <button
+              onClick={() => { setView('map'); setSelectedPark(null); }}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                view === 'map' ? 'bg-teal-500 text-white' : 'bg-teal-800/50 hover:bg-teal-700/50 text-teal-100'
+              }`}
+            >
+              <MapPin size={20} />
+              Map View
+            </button>
+            <button
+              onClick={() => { setView('list'); setSelectedPark(null); }}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                view === 'list' ? 'bg-teal-500 text-white' : 'bg-teal-800/50 hover:bg-teal-700/50 text-teal-100'
+              }`}
+            >
+              <List size={20} />
+              List View
+            </button>
+            <button
+              onClick={() => { setView('database'); setSelectedPark(null); setSelectedCoaster(null); }}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                view === 'database' ? 'bg-teal-500 text-white' : 'bg-teal-800/50 hover:bg-teal-700/50 text-teal-100'
+              }`}
+            >
+              <Database size={20} />
+              Database
+            </button>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Search parks..."
+            className="w-full bg-teal-800/40 border border-teal-400/30 rounded-lg px-4 py-3 text-white placeholder-teal-300"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </header>
+
+      <div className="p-6">
+        {view === 'map' && !selectedPark && (
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-8 mb-6">
+              <h2 className="text-3xl font-bold mb-4 text-center text-yellow-300">Click a park on the map!</h2>
+              <div className="relative rounded-lg overflow-hidden border-2 border-teal-400/30" style={{ height: '600px' }}>
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: 'url(https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg)',
+                    backgroundPosition: 'center 30%'
+                  }}
+                ></div>
+                <div className="absolute inset-0 bg-teal-950/30"></div>
+                <svg viewBox="0 0 1000 700" className="w-full h-full relative z-10">
+                  {getFilteredParks().map((park) => {
+                    const x = ((park.lon + 130) / 60) * 1000;
+                    const y = ((50 - park.lat) / 25) * 600;
+                    const coastersHere = park.coasters.length;
+                    const riddenHere = park.coasters.filter(c => riddenCoasters[getCoasterId(park.id, c.name)]).length;
+
+                    return (
+                      <g key={park.id} onClick={() => setSelectedPark(park)} style={{ cursor: 'pointer' }}>
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r="22"
+                          className="fill-yellow-400 hover:fill-yellow-300 transition-all"
+                          stroke="white"
+                          strokeWidth="4"
+                        />
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r="16"
+                          className="fill-teal-400"
+                          opacity={Math.max(0.3, riddenHere / coastersHere)}
+                        />
+                        <text
+                          x={x}
+                          y={y + 40}
+                          textAnchor="middle"
+                          className="fill-white font-bold"
+                          style={{
+                            pointerEvents: 'none',
+                            fontSize: '12px',
+                            textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)'
+                          }}
+                        >
+                          {park.name.length > 18 ? park.name.substring(0, 16) + '...' : park.name}
+                        </text>
+                        <text
+                          x={x}
+                          y={y + 56}
+                          textAnchor="middle"
+                          className="fill-yellow-300"
+                          style={{
+                            pointerEvents: 'none',
+                            fontSize: '10px',
+                            textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {riddenHere}/{coastersHere} coasters
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+              <div className="mt-4 text-center text-sm text-teal-100">
+                <div className="flex items-center justify-center gap-6">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-yellow-400 border-2 border-white"></span> Park Location
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-teal-400"></span> Progress (more teal = more ridden)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'list' && !selectedPark && (
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {getFilteredParks().map((park) => {
+                const coastersHere = park.coasters.length;
+                const riddenHere = park.coasters.filter(c => riddenCoasters[getCoasterId(park.id, c.name)]).length;
+
+                return (
+                  <div
+                    key={park.id}
+                    onClick={() => setSelectedPark(park)}
+                    className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-6 hover:bg-teal-700/40 hover:border-yellow-400/40 transition-all cursor-pointer"
+                  >
+                    <h3 className="text-2xl font-bold mb-2 text-yellow-300">{park.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-teal-200 mb-4">
+                      <MapPin size={14} />
+                      {park.location}, {park.state}
+                    </div>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm text-teal-100">
+                        <span>Total Coasters:</span>
+                        <span className="font-bold text-yellow-300">{coastersHere}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-teal-100">
+                        <span>You've Ridden:</span>
+                        <span className="font-bold text-yellow-300">{riddenHere}</span>
+                      </div>
+                      <div className="w-full bg-teal-950 rounded-full h-2 border border-teal-600">
+                        <div
+                          className="bg-gradient-to-r from-yellow-400 to-yellow-300 h-2 rounded-full transition-all"
+                          style={{ width: `${(riddenHere / coastersHere) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <button className="w-full bg-teal-600 hover:bg-teal-500 py-2 rounded-lg font-bold flex items-center justify-center gap-2 text-white">
+                      View Coasters
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {view === 'database' && (
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-3xl font-bold text-yellow-300">Database View</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDbTable('parks')}
+                    className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                      dbTable === 'parks' ? 'bg-yellow-500 text-gray-900' : 'bg-teal-700/50 hover:bg-teal-600/50 text-teal-100'
+                    }`}
+                  >
+                    Parks ({PARKS.length})
+                  </button>
+                  <button
+                    onClick={() => setDbTable('coasters')}
+                    className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                      dbTable === 'coasters' ? 'bg-yellow-500 text-gray-900' : 'bg-teal-700/50 hover:bg-teal-600/50 text-teal-100'
+                    }`}
+                  >
+                    Coasters ({stats.totalCoasters})
+                  </button>
+                </div>
+              </div>
+              <p className="text-teal-200 text-sm">Review the data below. Click column headers to sort. Let me know any changes you'd like!</p>
+            </div>
+
+            {dbTable === 'parks' && (
+              <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-teal-900/50 border-b border-teal-400/30">
+                      <tr>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'id', direction: sortConfig.key === 'id' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">ID <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'name', direction: sortConfig.key === 'name' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Name <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'location', direction: sortConfig.key === 'location' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Location <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'state', direction: sortConfig.key === 'state' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">State <ArrowUpDown size={14} /></span>
+                        </th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold">Lat</th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold">Lon</th>
+                        <th className="px-4 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'coasterCount', direction: sortConfig.key === 'coasterCount' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Coasters <ArrowUpDown size={14} /></span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...PARKS].sort((a, b) => {
+                        if (!sortConfig.key) return 0;
+                        let aVal = sortConfig.key === 'coasterCount' ? a.coasters.length : a[sortConfig.key];
+                        let bVal = sortConfig.key === 'coasterCount' ? b.coasters.length : b[sortConfig.key];
+                        if (typeof aVal === 'string') {
+                          return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                        }
+                        return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                      }).map((park, idx) => (
+                        <tr key={park.id} className={`border-b border-teal-400/10 hover:bg-teal-700/30 ${idx % 2 === 0 ? 'bg-teal-900/20' : ''}`}>
+                          <td className="px-4 py-3 text-teal-100">{park.id}</td>
+                          <td className="px-4 py-3 text-white font-medium">{park.name}</td>
+                          <td className="px-4 py-3 text-teal-200">{park.location}</td>
+                          <td className="px-4 py-3 text-teal-200">{park.state}</td>
+                          <td className="px-4 py-3 text-teal-300 font-mono text-sm">{park.lat}</td>
+                          <td className="px-4 py-3 text-teal-300 font-mono text-sm">{park.lon}</td>
+                          <td className="px-4 py-3 text-yellow-300 font-bold">{park.coasters.length}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {dbTable === 'coasters' && (
+              <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-teal-900/50 border-b border-teal-400/30">
+                      <tr>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'parkName', direction: sortConfig.key === 'parkName' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Park <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'name', direction: sortConfig.key === 'name' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Name <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'type', direction: sortConfig.key === 'type' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Type <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'speed', direction: sortConfig.key === 'speed' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Speed <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'height', direction: sortConfig.key === 'height' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Height <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'drop', direction: sortConfig.key === 'drop' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Drop <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'length', direction: sortConfig.key === 'length' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Length <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'inversions', direction: sortConfig.key === 'inversions' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Inv. <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold cursor-pointer hover:bg-teal-800/50" onClick={() => setSortConfig({ key: 'opened', direction: sortConfig.key === 'opened' && sortConfig.direction === 'asc' ? 'desc' : 'asc' })}>
+                          <span className="flex items-center gap-1">Opened <ArrowUpDown size={12} /></span>
+                        </th>
+                        <th className="px-3 py-3 text-yellow-300 font-bold">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const allCoasters = PARKS.flatMap(park =>
+                          park.coasters.map(c => ({ ...c, parkId: park.id, parkName: park.name }))
+                        );
+                        return allCoasters.sort((a, b) => {
+                          if (!sortConfig.key) return 0;
+                          let aVal = a[sortConfig.key];
+                          let bVal = b[sortConfig.key];
+                          if (typeof aVal === 'string') {
+                            return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                          }
+                          return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                        }).map((coaster, idx) => (
+                          <tr key={`${coaster.parkId}-${coaster.name}`} className={`border-b border-teal-400/10 hover:bg-teal-700/30 ${idx % 2 === 0 ? 'bg-teal-900/20' : ''}`}>
+                            <td className="px-3 py-2 text-teal-200">{coaster.parkName}</td>
+                            <td className="px-3 py-2 text-white font-medium">{coaster.name}</td>
+                            <td className="px-3 py-2 text-teal-300">{coaster.type}</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.speed} mph</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.height} ft</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.drop} ft</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.length} ft</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.inversions}</td>
+                            <td className="px-3 py-2 text-teal-100">{coaster.opened}</td>
+                            <td className="px-3 py-2 text-teal-300 max-w-xs truncate" title={coaster.description}>{coaster.description}</td>
+                          </tr>
+                        ));
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedPark && !selectedCoaster && (
+          <div className="max-w-7xl mx-auto">
+            <button
+              onClick={() => setSelectedPark(null)}
+              className="mb-6 bg-teal-700/50 hover:bg-teal-600/50 border border-teal-400/30 px-6 py-3 rounded-lg font-bold text-white"
+            >
+              ← Back to {view === 'map' ? 'Map' : 'Parks'}
+            </button>
+
+            <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-6 mb-6">
+              <h2 className="text-4xl font-bold mb-2 text-yellow-300">{selectedPark.name}</h2>
+              <div className="flex items-center gap-2 text-xl text-teal-200">
+                <MapPin size={20} />
+                {selectedPark.location}, {selectedPark.state}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {selectedPark.coasters.map((coaster, idx) => {
+                const coasterId = getCoasterId(selectedPark.id, coaster.name);
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedCoaster({ ...coaster, parkId: selectedPark.id })}
+                    className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-6 hover:bg-teal-700/40 hover:border-yellow-400/40 transition-all cursor-pointer"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-2xl font-bold mb-1 text-yellow-300">{coaster.name}</h3>
+                        <div className="text-sm text-teal-200">{coaster.type}</div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRidden(selectedPark.id, coaster.name);
+                        }}
+                      >
+                        {riddenCoasters[coasterId] ? (
+                          <CheckCircle className="text-yellow-400" size={28} />
+                        ) : (
+                          <Circle className="text-teal-300" size={28} />
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                      <div className="flex items-center gap-2 text-teal-100">
+                        <Zap size={16} className="text-yellow-400" />
+                        <span>{coaster.speed}mph</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-teal-100">
+                        <Mountain size={16} className="text-yellow-400" />
+                        <span>{coaster.height}ft</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-1 justify-center" onClick={(e) => e.stopPropagation()}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => handleSetRating(selectedPark.id, coaster.name, star)}
+                          className="transition-transform hover:scale-110"
+                        >
+                          <Star
+                            size={20}
+                            className={star <= (ratings[coasterId] || 0)
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-teal-400'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {selectedCoaster && (
+          <div
+            className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"
+            onClick={() => setSelectedCoaster(null)}
+          >
+            <div
+              className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-4xl font-bold mb-2">{selectedCoaster.name}</h2>
+                    <div className="text-gray-300">{selectedPark.name}</div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedCoaster(null)}
+                    className="text-4xl hover:text-red-400"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="aspect-video mb-6 rounded-lg overflow-hidden">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={selectedCoaster.povVideo}
+                    title={selectedCoaster.name}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+
+                <p className="text-lg mb-6 text-gray-200">{selectedCoaster.description}</p>
+
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h3 className="font-bold mb-2 text-blue-400">Stats</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Speed:</span>
+                        <span className="font-bold">{selectedCoaster.speed} mph</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Height:</span>
+                        <span className="font-bold">{selectedCoaster.height} ft</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Drop:</span>
+                        <span className="font-bold">{selectedCoaster.drop} ft</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Length:</span>
+                        <span className="font-bold">{selectedCoaster.length} ft</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Inversions:</span>
+                        <span className="font-bold">{selectedCoaster.inversions}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <h3 className="font-bold mb-2 text-purple-400">Details</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Type:</span>
+                        <span className="font-bold">{selectedCoaster.type}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Opened:</span>
+                        <span className="font-bold">{selectedCoaster.opened}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-center justify-center">
+                  <button
+                    onClick={() => toggleRidden(selectedCoaster.parkId, selectedCoaster.name)}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold ${
+                      riddenCoasters[getCoasterId(selectedCoaster.parkId, selectedCoaster.name)]
+                        ? 'bg-green-500 hover:bg-green-600'
+                        : 'bg-gray-600 hover:bg-gray-700'
+                    }`}
+                  >
+                    {riddenCoasters[getCoasterId(selectedCoaster.parkId, selectedCoaster.name)] ? (
+                      <>
+                        <CheckCircle size={20} />
+                        Ridden!
+                      </>
+                    ) : (
+                      <>
+                        <Circle size={20} />
+                        Mark as Ridden
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        onClick={() => handleSetRating(selectedCoaster.parkId, selectedCoaster.name, star)}
+                        className="transition-transform hover:scale-125"
+                      >
+                        <Star
+                          size={32}
+                          className={star <= (ratings[getCoasterId(selectedCoaster.parkId, selectedCoaster.name)] || 0)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-500'}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
