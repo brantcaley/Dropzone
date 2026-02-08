@@ -240,10 +240,13 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-teal-900 via-teal-800 to-gray-900 text-white">
       <header className="bg-teal-950/50 backdrop-blur-md border-b border-teal-400/20 p-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-gold-400 via-yellow-300 to-gold-500 bg-clip-text text-transparent text-center" style={{ backgroundImage: 'linear-gradient(to right, #fbbf24, #fcd34d, #fbbf24)' }}>
-            North America Top Parks
-          </h1>
-          <p className="text-xl text-teal-100 text-center mb-4">Track rollercoasters at top parks!</p>
+          <div className="flex justify-center mb-4">
+            <img
+              src="/logo.png"
+              alt="Dropzone Rollercoaster Catalog"
+              className="h-32 md:h-40 w-auto"
+            />
+          </div>
 
           <div className="flex justify-center gap-4 mb-4 text-sm">
             <div className="bg-teal-700/40 border border-teal-400/30 rounded-lg px-4 py-2">
