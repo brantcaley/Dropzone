@@ -42,7 +42,7 @@ const PARKS = [
     lat: 41.4779,
     lon: -82.6831,
     coasters: [
-      { name: "Top Thrill 2", speed: 120, height: 420, drop: 420, length: 3422, inversions: 0, type: "Steel Multi-Launch", opened: 2024, povVideo: "https://www.youtube.com/embed/8bKB3HdLx0o", description: "World's tallest triple-launch strata coaster." },
+      { name: "Top Thrill 2", speed: 120, height: 420, drop: 420, length: 3422, inversions: 0, type: "Steel Multi-Launch", opened: 2024, povVideo: "https://www.youtube.com/embed/JIiLMgn2_0Q", description: "World's tallest triple-launch strata coaster." },
       { name: "Millennium Force", speed: 93, height: 310, drop: 300, length: 6595, inversions: 0, type: "Steel Giga", opened: 2000, povVideo: "https://www.youtube.com/embed/3bHKv5-c11c", description: "First giga coaster with 310-foot drop." },
       { name: "Valravn", speed: 75, height: 223, drop: 214, length: 3415, inversions: 3, type: "Steel Dive", opened: 2016, povVideo: "https://www.youtube.com/embed/VjCIxRb4LWo", description: "World's tallest dive coaster." },
       { name: "Steel Vengeance", speed: 74, height: 205, drop: 200, length: 5740, inversions: 4, type: "Hybrid RMC", opened: 2018, povVideo: "https://www.youtube.com/embed/gXamBX7CpNI", description: "World's longest hybrid with 27 seconds airtime." },
