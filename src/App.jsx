@@ -1,5 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Star, MapPin, Zap, Mountain, CheckCircle, Circle, List, ChevronRight, Database, ArrowUpDown } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+
+// Custom marker icon
+const createCustomIcon = (progress) => {
+  const color = progress > 0.7 ? '#2dd4bf' : progress > 0.3 ? '#fbbf24' : '#f87171';
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div style="
+        background: ${color};
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        opacity: ${Math.max(0.4, progress)};
+      "></div>
+    </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -18]
+  });
+};
 
 const PARKS = [
   {
@@ -313,69 +345,47 @@ export default function App() {
             <div className="bg-teal-800/30 backdrop-blur-md border border-teal-400/20 rounded-xl p-8 mb-6">
               <h2 className="text-3xl font-bold mb-4 text-center text-yellow-300">Click a park on the map!</h2>
               <div className="relative rounded-lg overflow-hidden border-2 border-teal-400/30" style={{ height: '600px' }}>
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: 'url(https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg)',
-                    backgroundPosition: 'center 30%'
-                  }}
-                ></div>
-                <div className="absolute inset-0 bg-teal-950/30"></div>
-                <svg viewBox="0 0 1000 700" className="w-full h-full relative z-10">
+                <MapContainer
+                  center={[37.5, -96]}
+                  zoom={4}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  />
                   {getFilteredParks().map((park) => {
-                    const x = ((park.lon + 130) / 60) * 1000;
-                    const y = ((50 - park.lat) / 25) * 600;
                     const coastersHere = park.coasters.length;
                     const riddenHere = park.coasters.filter(c => riddenCoasters[getCoasterId(park.id, c.name)]).length;
+                    const progress = riddenHere / coastersHere;
 
                     return (
-                      <g key={park.id} onClick={() => setSelectedPark(park)} style={{ cursor: 'pointer' }}>
-                        <circle
-                          cx={x}
-                          cy={y}
-                          r="22"
-                          className="fill-yellow-400 hover:fill-yellow-300 transition-all"
-                          stroke="white"
-                          strokeWidth="4"
-                        />
-                        <circle
-                          cx={x}
-                          cy={y}
-                          r="16"
-                          className="fill-teal-400"
-                          opacity={Math.max(0.3, riddenHere / coastersHere)}
-                        />
-                        <text
-                          x={x}
-                          y={y + 40}
-                          textAnchor="middle"
-                          className="fill-white font-bold"
-                          style={{
-                            pointerEvents: 'none',
-                            fontSize: '12px',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)'
-                          }}
-                        >
-                          {park.name.length > 18 ? park.name.substring(0, 16) + '...' : park.name}
-                        </text>
-                        <text
-                          x={x}
-                          y={y + 56}
-                          textAnchor="middle"
-                          className="fill-yellow-300"
-                          style={{
-                            pointerEvents: 'none',
-                            fontSize: '10px',
-                            textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
-                            fontWeight: 'bold'
-                          }}
-                        >
-                          {riddenHere}/{coastersHere} coasters
-                        </text>
-                      </g>
+                      <Marker
+                        key={park.id}
+                        position={[park.lat, park.lon]}
+                        icon={createCustomIcon(progress)}
+                        eventHandlers={{
+                          click: () => setSelectedPark(park)
+                        }}
+                      >
+                        <Popup>
+                          <div className="text-center p-2">
+                            <h3 className="font-bold text-lg text-gray-900">{park.name}</h3>
+                            <p className="text-gray-600 text-sm">{park.location}</p>
+                            <p className="text-teal-600 font-semibold mt-1">{riddenHere}/{coastersHere} coasters ridden</p>
+                            <button
+                              onClick={() => setSelectedPark(park)}
+                              className="mt-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-1 rounded text-sm font-bold"
+                            >
+                              View Park
+                            </button>
+                          </div>
+                        </Popup>
+                      </Marker>
                     );
                   })}
-                </svg>
+                </MapContainer>
               </div>
               <div className="mt-4 text-center text-sm text-teal-100">
                 <div className="flex items-center justify-center gap-6">
@@ -386,6 +396,7 @@ export default function App() {
                     <span className="w-5 h-5 rounded-full bg-teal-400"></span> Progress (more teal = more ridden)
                   </span>
                 </div>
+                <p className="mt-2 text-teal-300">Use scroll wheel or pinch to zoom • Drag to pan</p>
               </div>
             </div>
           </div>
