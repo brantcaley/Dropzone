@@ -242,7 +242,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center mb-4">
             <img
-              src="/logo.png"
+              src={`${import.meta.env.BASE_URL}logo.png`}
               alt="Dropzone Rollercoaster Catalog"
               className="h-32 md:h-40 w-auto"
             />
